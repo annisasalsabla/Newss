@@ -1,5 +1,6 @@
 package com.annisa.news
 
+
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -13,33 +14,29 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.annisa.news.api.ApiClient
-import com.annisa.news.models.RegisterResponse
+import com.annisa.news.models.LoginResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class RegisActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity() {
     private lateinit var etUsername: EditText
     private lateinit var etPassword: EditText
-    private lateinit var etFullname: EditText
-    private lateinit var etEmail: EditText
-    private lateinit var btnSignup: Button
+    private lateinit var btnLogin: Button
     private lateinit var progressBar: ProgressBar
-    private lateinit var tvLogin: TextView // Tambahkan TextView untuk Log In redirect
+    private lateinit var tvRegister: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_regis)
+        setContentView(R.layout.activity_login)
 
         // Inisialisasi view
         etUsername = findViewById(R.id.etUsername)
         etPassword = findViewById(R.id.etPassword)
-        etFullname = findViewById(R.id.etFullname)
-        etEmail = findViewById(R.id.etEmail)
-        btnSignup = findViewById(R.id.btnLogin)
+        btnLogin = findViewById(R.id.btnLogin)
         progressBar = findViewById(R.id.progressBar)
-        tvLogin = findViewById(R.id.tvRegister) // Inisialisasi TextView
+        tvRegister = findViewById(R.id.tvRegister) // Tambahan untuk TextView Register
 
         // Handle window insets
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -48,21 +45,21 @@ class RegisActivity : AppCompatActivity() {
             insets
         }
 
-        // Tombol Signup
-        btnSignup.setOnClickListener {
+        // Tombol Login
+        btnLogin.setOnClickListener {
             if (validateInput()) {
-                prosesRegister()
+                prosesLogin()
             }
         }
 
-        // Event klik pada tulisan "Log In"
-        tvLogin.setOnClickListener {
-            val intent = Intent(this@RegisActivity, LoginActivity::class.java)
+        // Tombol Register (klik TextView untuk ke halaman RegisActivity)
+        tvRegister.setOnClickListener {
+            val intent = Intent(this@LoginActivity, RegisActivity::class.java)
             startActivity(intent)
         }
     }
 
-    // Validasi input sebelum registrasi
+    // Validasi input username dan password
     private fun validateInput(): Boolean {
         if (etUsername.text.isNullOrEmpty()) {
             etUsername.error = "Username harus diisi"
@@ -72,68 +69,68 @@ class RegisActivity : AppCompatActivity() {
             etPassword.error = "Password harus diisi"
             return false
         }
-        if (etFullname.text.isNullOrEmpty()) {
-            etFullname.error = "Nama lengkap harus diisi"
-            return false
-        }
-        if (etEmail.text.isNullOrEmpty()) {
-            etEmail.error = "Email harus diisi"
-            return false
-        }
         return true
     }
 
-    // METHOD PROSES REGISTRASI
-    private fun prosesRegister() {
+    // Method Proses Login
+    private fun prosesLogin() {
+        // Tampilkan ProgressBar
         progressBar.visibility = View.VISIBLE
-        btnSignup.isEnabled = false
+        btnLogin.isEnabled = false // Nonaktifkan tombol untuk mencegah double klik
 
-        ApiClient.apiService.register(
+        // Panggil API untuk login
+        ApiClient.apiService.login(
             etUsername.text.toString(),
-            etPassword.text.toString(),
-            etFullname.text.toString(),
-            etEmail.text.toString()
-        ).enqueue(object : Callback<RegisterResponse> {
+            etPassword.text.toString()
+        ).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(
-                call: Call<RegisterResponse>,
-                response: Response<RegisterResponse>
+                call: Call<LoginResponse>,
+                response: Response<LoginResponse>
             ) {
+                // Sembunyikan ProgressBar
                 progressBar.visibility = View.GONE
-                btnSignup.isEnabled = true
+                btnLogin.isEnabled = true
 
                 if (response.isSuccessful) {
-                    val registerResponse = response.body()
-                    if (registerResponse?.success == true) {
+                    val loginResponse = response.body()
+                    if (loginResponse?.success == true) {
+                        // Jika login berhasil
                         Toast.makeText(
-                            this@RegisActivity,
-                            "Registrasi berhasil! Silakan login.",
+                            this@LoginActivity,
+                            "Login berhasil! Selamat datang, ${loginResponse.username ?: "Pengguna"}",
                             Toast.LENGTH_SHORT
                         ).show()
-                        val intent = Intent(this@RegisActivity, LoginActivity::class.java)
+
+                        // Arahkan ke halaman DashboardActivity
+                        val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
                         startActivity(intent)
                         finish()
                     } else {
+                        // Tampilkan pesan error dari server
                         Toast.makeText(
-                            this@RegisActivity,
-                            "Registrasi gagal: ${registerResponse?.message ?: "Terjadi kesalahan"}",
+                            this@LoginActivity,
+                            "Login gagal: ${loginResponse?.message ?: "Cek username dan password"}",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                 } else {
+                    // Respons gagal
                     Toast.makeText(
-                        this@RegisActivity,
-                        "Registrasi gagal: ${response.message()}",
+                        this@LoginActivity,
+                        "Login gagal: ${response.message()}",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
             }
 
-            override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                // Sembunyikan ProgressBar
                 progressBar.visibility = View.GONE
-                btnSignup.isEnabled = true
+                btnLogin.isEnabled = true
 
+                // Tampilkan pesan kesalahan
                 Toast.makeText(
-                    this@RegisActivity,
+                    this@LoginActivity,
                     "Terjadi kesalahan: ${t.localizedMessage}",
                     Toast.LENGTH_SHORT
                 ).show()
