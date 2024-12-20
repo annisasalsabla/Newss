@@ -1,55 +1,51 @@
 package com.annisa.news
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.RatingBar
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.annisa.news.R
-import com.annisa.news.databinding.LayoutItemNewsBinding
 import com.annisa.news.models.BeritaResponse
-import com.bumptech.glide.Glide
-import android.util.Log
-import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.squareup.picasso.Picasso
 
-class BeritaAdapter(private val beritaList: List<BeritaResponse.ListItems>) :
-    RecyclerView.Adapter<BeritaAdapter.BeritaViewHolder>() {
 
-    // ViewHolder untuk mengikat layout item berita
-    inner class BeritaViewHolder(val binding: LayoutItemNewsBinding) :
-        RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(db_berita: BeritaResponse.ListItems) {
-            // Mengikat data berita ke elemen di layout
-            binding.tvJudul.text = db_berita.judul
-            binding.tvTglBerita.text = db_berita.tgl_berita
-            binding.tvRating.text = db_berita.rating.toString()
-
-            Log.d("Glide URL", "Memuat URL gambar: ${db_berita.gambar_berita}")
-
-            // Memuat gambar menggunakan Glide
-            Glide.with(binding.imgBerita.context)
-                .load(db_berita.gambar_berita)
-                .placeholder(R.drawable.ic_launcher_background) // Placeholder saat gambar belum siap
-                .error(R.drawable.ic_launcher_background) // Gambar cadangan jika gagal dimuat
-                .diskCacheStrategy(DiskCacheStrategy.ALL) // Menyimpan cache disk untuk performa
-                .into(binding.imgBerita)
-
-            // Mengatur RatingBar
-            binding.ratingBar.rating = db_berita.rating.toFloat()
-        }
+class BeritaAdapter(
+    val dataBerita: ArrayList<BeritaResponse.ListItems>
+) : RecyclerView.Adapter<BeritaAdapter.ViewHolder>(){
+    class ViewHolder(view : View): RecyclerView.ViewHolder(view) {
+        //Inisialisasi Widget
+        val imgBerita = view.findViewById<ImageView>(R.id.imgBerita)
+        val tvJudul = view.findViewById<TextView>(R.id.tvJudul)
+        val tvTglBerita = view.findViewById<TextView>(R.id.tvTglBerita)
+        val tvRating = view.findViewById<TextView>(R.id.tvRating)
+        val ratingBar = view.findViewById<RatingBar>(R.id.ratingBar)
     }
 
-    // Menghasilkan ViewHolder untuk item berita
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BeritaViewHolder {
-        val binding = LayoutItemNewsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return BeritaViewHolder(binding)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.layout_item_news,parent,false)
+        return ViewHolder(view)
     }
 
-    // Mengikat data ke ViewHolder
-    override fun onBindViewHolder(holder: BeritaViewHolder, position: Int) {
-        val db_berita = beritaList[position]
-        holder.bind(db_berita)
+    override fun getItemCount(): Int {
+        return dataBerita.size
     }
 
-    // Menentukan jumlah item dalam daftar berita
-    override fun getItemCount(): Int = beritaList.size
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        //Tampilkan data//
+        val hasilResponse = dataBerita[position]
+        Picasso.get().load(hasilResponse.gambar_berita).into(holder.imgBerita)
+        holder.tvJudul.text = hasilResponse.judul
+        holder.tvTglBerita.text = hasilResponse.tgl_berita
+        holder.tvRating.text = "${hasilResponse.rating}"
+        holder.ratingBar.rating = hasilResponse.rating.toFloat()
+
+    }
+
+    fun setData(data: List<BeritaResponse.ListItems>){
+        dataBerita.clear()
+        dataBerita.addAll(data)
+    }
 }

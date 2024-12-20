@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
     // Pastikan BASE_URL memiliki trailing slash "/" di akhir
-    private const val BASE_URL = "http://192.168.100.90/"
+    private const val BASE_URL = "http://192.168.237.17/"
 
     // Fungsi untuk membuat OkHttpClient dengan Interceptor untuk logging
     private fun provideOkHttpClient(): OkHttpClient {

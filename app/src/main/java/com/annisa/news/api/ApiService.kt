@@ -9,6 +9,7 @@ import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -32,7 +33,7 @@ interface ApiService {
 
     // Endpoint untuk Mendapatkan Data Berita
     @GET("API_BASIC/API_BASIC/get_berita.php")
-    fun getBerita(): Call<BeritaResponse>
+    fun getListBerita(@Query("judul") judul:String): Call<BeritaResponse>
 }
 
 
