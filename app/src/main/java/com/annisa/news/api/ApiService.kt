@@ -1,15 +1,10 @@
 package com.annisa.news.api
 
-import com.annisa.news.models.BeritaResponse
-import com.annisa.news.models.LoginResponse
-import com.annisa.news.models.RegisterResponse
+import com.annisa.news.models.*
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface ApiService {
 
@@ -19,12 +14,11 @@ interface ApiService {
     fun register(
         @Field("username") username: String,
         @Field("password") password: String,
-        @Field("fullname") fullname: String, // Fixed typo (from fullanme to fullname)
+        @Field("fullname") fullname: String,
         @Field("email") email: String,
     ): Call<RegisterResponse>
 
     // Endpoint untuk Login
-
     @FormUrlEncoded
     @POST("API_BASIC/API_BASIC/login.php")
     fun login(
@@ -34,7 +28,16 @@ interface ApiService {
 
     // Endpoint untuk Mendapatkan Data Berita
     @GET("API_BASIC/API_BASIC/get_berita.php")
-    fun getListBerita(@Query("judul") judul:String): Call<BeritaResponse>
+    fun getListBerita(@Query("judul") judul: String): Call<BeritaResponse>
+
+    // Endpoint untuk Menambah Berita
+    @Multipart
+    @POST("API_BASIC/API_BASIC/add_berita.php")
+    fun addBerita(
+        @Part("judul") judul: RequestBody,
+        @Part("isiBerita") isiBerita: RequestBody,
+        @Part fileGambar: MultipartBody.Part
+    ): Call<TambahBeritaResponse>
+
+
 }
-
-
