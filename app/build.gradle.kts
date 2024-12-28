@@ -73,6 +73,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0") // Versi terbaru
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 
+    implementation ("com.github.dhaval2404:imagepicker:2.1")
+
     // Optional - RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2") // Versi terbaru
 
