@@ -2,10 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
-
-
-    >
+    android:layout_margin="5dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -41,6 +38,7 @@
             android:text="17-12-2024 12:17"
             android:layout_marginTop="5dp"
             />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,9 +63,26 @@
             android:progressTint="@color/orange2"
             />
 
+        <!-- Adjusted the delete icon position to be lower with more space -->
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/ratingBar"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="10dp">
+
+        <ImageView
+            android:id="@+id/imgDelete"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/baseline_delete_24"
+            android:contentDescription="Delete"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 
+</RelativeLayout>
 
-
-</androidx.cardview.widget.CardView>
+    </androidx.cardview.widget.CardView>

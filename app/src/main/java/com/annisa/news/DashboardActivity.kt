@@ -10,11 +10,10 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.annisa.news.api.ApiClient
 import com.annisa.news.models.BeritaResponse
+import com.annisa.news.models.DeleteBeritaResponse
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import retrofit2.Call
 import retrofit2.Callback
@@ -38,39 +37,45 @@ class DashboardActivity : AppCompatActivity() {
         floatBtnTambah = findViewById(R.id.floatBtnTambah)
         imgNotFound = findViewById(R.id.imgNotFound)
 
-        // Panggil method getBerita
+        // Initial fetch of data
         getBerita("")
 
-        // Set listener untuk search view
+        // Set listener for search view
         svJudul.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 return false
             }
 
-            override fun onQueryTextChange(pencarian: String?): Boolean {
-                getBerita(pencarian.toString())
+            override fun onQueryTextChange(query: String?): Boolean {
+                getBerita(query.orEmpty())
                 return true
             }
         })
 
-        // Set listener untuk tombol tambah berita
+        // Set listener for adding news button
         floatBtnTambah.setOnClickListener {
             val intent = Intent(this@DashboardActivity, TambahBeritaActivity::class.java)
-            addBeritaResult.launch(intent) // Gunakan activity result untuk menangani kembali dari TambahBeritaActivity
+            addBeritaResult.launch(intent) // Launch new activity for adding news
         }
     }
 
+    // Fetch list of news articles
     private fun getBerita(judul: String) {
         progressBar.visibility = View.VISIBLE
         ApiClient.apiService.getListBerita(judul).enqueue(object : Callback<BeritaResponse> {
             override fun onResponse(call: Call<BeritaResponse>, response: Response<BeritaResponse>) {
                 if (response.isSuccessful) {
+                    val beritaData = response.body()!!.data
                     if (response.body()!!.success) {
-                        beritaAdapter = BeritaAdapter(response.body()!!.data)
+                        // Pass delete action to the adapter
+                        beritaAdapter = BeritaAdapter(beritaData) { beritaId ->
+                            deleteBerita(beritaId) // Handle delete action from adapter
+                        }
                         rvBerita.adapter = beritaAdapter
                         imgNotFound.visibility = View.GONE
                     } else {
-                        beritaAdapter = BeritaAdapter(arrayListOf())
+                        // Handle empty or failed response
+                        beritaAdapter = BeritaAdapter(arrayListOf()) { }
                         rvBerita.adapter = beritaAdapter
                         imgNotFound.visibility = View.VISIBLE
                     }
@@ -85,10 +90,32 @@ class DashboardActivity : AppCompatActivity() {
         })
     }
 
+    // Handle the delete operation
+    private fun deleteBerita(beritaId: Int) {
+        ApiClient.apiService.deleteBerita(beritaId.toString()).enqueue(object : Callback<DeleteBeritaResponse> {
+            override fun onResponse(
+                call: Call<DeleteBeritaResponse>,
+                response: Response<DeleteBeritaResponse>
+            ) {
+                if (response.isSuccessful && response.body()?.success == true) {
+                    // Update the news list after deletion
+                    Toast.makeText(this@DashboardActivity, "Berita deleted successfully", Toast.LENGTH_SHORT).show()
+                    getBerita("") // Refresh news list after deletion
+                } else {
+                    Toast.makeText(this@DashboardActivity, "Failed to delete berita", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<DeleteBeritaResponse>, t: Throwable) {
+                Toast.makeText(this@DashboardActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
     private val addBeritaResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            // Setelah berhasil menambah berita, perbarui daftar berita
-            getBerita("") // Panggil ulang untuk mendapatkan data terbaru
+            // Refresh the berita list after successfully adding a new berita
+            getBerita("")
         }
     }
 }

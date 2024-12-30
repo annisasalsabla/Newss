@@ -39,5 +39,7 @@ interface ApiService {
         @Part fileGambar: MultipartBody.Part
     ): Call<TambahBeritaResponse>
 
-
+    @FormUrlEncoded
+    @POST("API_BASIC/API_BASIC/delete_berita.php")
+    fun deleteBerita(@Field("id") id: String): Call<DeleteBeritaResponse>  // Change id to String
 }
